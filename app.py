@@ -56,7 +56,8 @@ def main():
             answer = 'OK'
             score += 1
         else:
-            answer = 'Nope, ' + session['tones']
+            answer = 'Nope, ' + session['tones'] + '. Rehearse <a href="'
+            answer += session['previous_sample'] + '">here</a>.'
         num_questions += 1
 
     session['score'] = score
@@ -67,15 +68,16 @@ def main():
     media_file = fld[fld.rfind('['):].split(':')[1].split(']')[0]
     character = media_file.split('.')[0]
 
-    path = j_reversed[media_file]
+    path = '/sample/' + j_reversed[media_file]
     fld_tones = re.findall('"[^"]+"', fld)
     tones = ''.join([x[-2] for x in fld_tones if x != '"colored"'])
 
     session['tones'] = tones
+    session['previous_sample'] = path
 
     perc = '%0.2f%%' % (100.0 * score/num_questions) if num_questions else '0%'
     return render_template('main.html',
-        path='/sample/' + path,
+        path=path,
         answer=answer,
         placeholder=('?' * len(tones)),
         character=character,

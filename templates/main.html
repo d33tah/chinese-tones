@@ -17,7 +17,7 @@
 </head>
 <body>
   <main role="main" class="container">
-    <h1>{{ answer }}</h1>
+    <h1>{{ answer|safe }}</h1>
     <h2>{{ score }} / {{ num_questions }} ({{ perc }}) {{ character }}</h2>
     <audio autoplay="autoplay" controls=
     ""><source src="{{ path }}" type="audio/mpeg"></audio>
