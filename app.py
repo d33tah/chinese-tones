@@ -8,7 +8,7 @@ import sys
 import os
 import random
 
-from flask import session, Flask, request, send_from_directory
+from flask import session, Flask, request, send_from_directory, render_template
 from flask_session.__init__ import Session
 
 app = Flask(__name__)
@@ -45,13 +45,7 @@ def main():
     fld_tones = re.findall('"[^"]+"', fld)
     tones = ''.join([x[-2] for x in fld_tones if x != '"colored"'])
     session['tones'] = tones
-    return ret + '''
-        <br />
-        <audio autoplay="autoplay" controls>
-        <source src="/sample/%s" type="audio/mpeg">
-        </audio>
-        <form><input name="tone_input" /><input type="submit"></form>
-    ''' % path
+    return render_template('main.html', path=path)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0')
