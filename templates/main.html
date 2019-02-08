@@ -11,23 +11,22 @@
   "Mark Otto, Jacob Thornton, and Bootstrap contributors">
   <meta name="generator" content="Jekyll v3.8.5">
   <title>Chinese Tones</title><!-- Bootstrap core CSS -->
-  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" rel=
-  "stylesheet"
-  crossorigin="anonymous">
+  <link href=
+  "https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css"
+  rel="stylesheet" crossorigin="anonymous">
 </head>
 <body>
   <main role="main" class="container">
-    <br>
-    <audio autoplay="autoplay" controls=""><source src=
-    "{{ path }}" type=
-    "audio/mpeg"></audio>
+    <h1>{{ answer }} </h1>
+    <h1>{{ character }}</h1>
+    <audio autoplay="autoplay" controls="">
+    <source src="{{ path }}" type="audio/mpeg"></audio>
     <form>
       <div class="form-group">
-        <label for="tone_input">Tones:</label> <input type="number"
-        class="form-control" name="tone_input" id="tone_input">
-      </div>
-      
-      <input type="submit" class="btn btn-info">
+        <label for="tone_input">Answer:</label> <input type=
+        "number" class="form-control" name="tone_input" id=
+        "tone_input" placeholder="{{ placeholder }}">
+      </div><input type="submit" class="btn btn-info">
     </form>
   </main>
   <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"

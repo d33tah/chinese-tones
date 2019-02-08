@@ -34,18 +34,32 @@ def send_sample(path):
 
 @app.route('/')
 def main():
-    ret = ''
+
+    # Compare answer with the one from the previous question
+    answer = 'Welcome to Chinese Tones!'
     if request.args.get('tone_input') and 'tones' in session:
         if session['tones'] == request.args['tone_input']:
-            ret = 'Dobrze'
+            answer = 'OK'
         else:
-            ret = session['tones']
+            answer = 'Nope, ' + session['tones']
+
     fld = random.choice(flds)
-    path = j_reversed[fld[fld.rfind('['):].split(':')[1].split(']')[0]]
+
+    media_file = fld[fld.rfind('['):].split(':')[1].split(']')[0]
+    character = media_file.split('.')[0]
+
+    path = j_reversed[media_file]
     fld_tones = re.findall('"[^"]+"', fld)
     tones = ''.join([x[-2] for x in fld_tones if x != '"colored"'])
+
     session['tones'] = tones
-    return render_template('main.html', path=path)
+
+    return render_template('main.html',
+        path='/sample/' + path,
+        answer=answer,
+        placeholder=('?' * len(tones)),
+        character=character,
+    )
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0')
