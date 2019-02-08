@@ -29,11 +29,32 @@
       </div><input type="submit" class="btn btn-info">
     </form>
   </main>
+  
+  <!-- Matomo -->
+<script type="text/javascript">
+  var _paq = window._paq || [];
+  /* tracker methods like "setCustomDimension" should be called before "trackPageView" */
+  _paq.push(['trackPageView']);
+  _paq.push(['enableLinkTracking']);
+  (function() {
+    var u="//piwik.strokes.ovh/";
+    _paq.push(['setTrackerUrl', u+'matomo.php']);
+    _paq.push(['setSiteId', '1']);
+    var d=document, g=d.createElement('script'), s=d.getElementsByTagName('script')[0];
+    g.type='text/javascript'; g.async=true; g.defer=true; g.src=u+'matomo.js'; s.parentNode.insertBefore(g,s);
+  })();
+</script>
+<!-- End Matomo Code -->
+
+  
   <footer class="page-footer font-small blue pt-4">
     <div class="container">
     Developed by d33tah, code hosted on
     <a href="https://github.com/d33tah/chinese-tones">Github</a>.
     Sound samples taken from <a href="https://ankiweb.net">ankiweb.net</a>.
+    GDPR notice: this website collects information about your interactions
+    with it for analytic purposes. If you're uncomfortable with sharing them,
+    click <a href="https://piwik.strokes.ovh/index.php?module=CoreAdminHome&action=optOut">here</a> to opt out.
     </div>
   </footer>
   <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
