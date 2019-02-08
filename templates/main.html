@@ -18,7 +18,7 @@
 <body>
   <main role="main" class="container">
     <h1>{{ answer }}</h1>
-    <h1>{{ score }} / {{ num_questions }} ({{ perc }}) {{ character }}</h1>
+    <h2>{{ score }} / {{ num_questions }} ({{ perc }}) {{ character }}</h2>
     <audio autoplay="autoplay" controls=
     ""><source src="{{ path }}" type="audio/mpeg"></audio>
     <form>
@@ -29,6 +29,13 @@
       </div><input type="submit" class="btn btn-info">
     </form>
   </main>
+  <footer class="page-footer font-small blue pt-4">
+    <div class="container">
+    Developed by d33tah, code hosted on
+    <a href="https://github.com/d33tah/chinese-tones">Github</a>.
+    Sound samples taken from <a href="https://ankiweb.net">ankiweb.net</a>.
+    </div>
+  </footer>
   <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
   integrity=
   "sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
