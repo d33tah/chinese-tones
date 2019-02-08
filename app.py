@@ -37,12 +37,22 @@ def main():
 
     score = session.get('score', 0)
     num_questions = session.get('num_questions', 0)
+    
+    # build answer string
+    d = {}
+    for key, value in sorted(request.args.items()):
+        if not key.startswith('answer-'):
+            continue
+        _, n, tone = key.split('-')
+        d[n] = tone
+    upto_biggest_answered = range(int(max(d.keys() or [-1]))+1)
+    u_answer = ''.join([d.get(str(i), '?') for i in upto_biggest_answered])
 
     # Compare answer with the one from the previous question
     answer = 'Welcome to Chinese Tones!'
-    if request.args.get('tone_input') and 'tones' in session:
+    if u_answer and 'tones' in session:
         add_score = 0
-        if session['tones'] == request.args['tone_input']:
+        if session['tones'] == u_answer:
             answer = 'OK'
             score += 1
         else:
