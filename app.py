@@ -50,7 +50,7 @@ def main():
         <audio autoplay="autoplay" controls>
         <source src="/sample/%s" type="audio/mpeg">
         </audio>
-        <form><input name="tone_input" /></form>
+        <form><input name="tone_input" /><input type="submit"></form>
     ''' % path
 
 if __name__ == '__main__':
