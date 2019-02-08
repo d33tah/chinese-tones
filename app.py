@@ -35,13 +35,22 @@ def send_sample(path):
 @app.route('/')
 def main():
 
+    score = session.get('score', 0)
+    num_questions = session.get('num_questions', 0)
+
     # Compare answer with the one from the previous question
     answer = 'Welcome to Chinese Tones!'
     if request.args.get('tone_input') and 'tones' in session:
+        add_score = 0
         if session['tones'] == request.args['tone_input']:
             answer = 'OK'
+            score += 1
         else:
             answer = 'Nope, ' + session['tones']
+        num_questions += 1
+
+    session['score'] = score
+    session['num_questions'] = num_questions
 
     fld = random.choice(flds)
 
@@ -54,11 +63,15 @@ def main():
 
     session['tones'] = tones
 
+    perc = '%0.2f%%' % (100.0 * score/num_questions) if num_questions else '0%'
     return render_template('main.html',
         path='/sample/' + path,
         answer=answer,
         placeholder=('?' * len(tones)),
         character=character,
+        score=score,
+        num_questions=num_questions,
+        perc=perc,
     )
 
 if __name__ == '__main__':

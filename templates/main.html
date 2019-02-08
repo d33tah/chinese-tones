@@ -17,10 +17,10 @@
 </head>
 <body>
   <main role="main" class="container">
-    <h1>{{ answer }} </h1>
-    <h1>{{ character }}</h1>
-    <audio autoplay="autoplay" controls="">
-    <source src="{{ path }}" type="audio/mpeg"></audio>
+    <h1>{{ answer }}</h1>
+    <h1>{{ score }} / {{ num_questions }} ({{ perc }}) {{ character }}</h1>
+    <audio autoplay="autoplay" controls=
+    ""><source src="{{ path }}" type="audio/mpeg"></audio>
     <form>
       <div class="form-group">
         <label for="tone_input">Answer:</label> <input type=
