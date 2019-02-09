@@ -17,48 +17,51 @@ DUMP_URL = (
     "latest/enwiktionary-latest-pages-articles.xml.bz2"
 )
 
+# NOTE: those three lists need to be kept sorted by length, otherwise regexes
+# won't work properly. See: https://stackoverflow.com/a/54610421/1091116
 INITIALS = [
-    'p', 'm', 'f', 'd', 't', 'n', 'l', 'g', 'k', 'h', 'j', 'q', 'x', 'z',
-    'h', 'c', 'h', 's', 'h', 'r', 'z', 'c', 's', 'b', 'ch', 'zh', 'sh'
+    'ch', 'sh', 'zh', 'b', 'c', 'd', 'f', 'g', 'h', 'j', 'k',
+    'l', 'm', 'n', 'p', 'q', 'r', 's', 't', 'x', 'z'
 ]
+
 FINALS = [
-    'a', 'o', 'e', 'ai', 'ei', 'ao', 'ou', 'an', 'ang', 'en', 'eng', 'er',
-    'u', 'ua', 'uo', 'uai', 'ui', 'uan', 'uang', 'un', 'ueng', 'ong', 'i',
-    'ia', 'ie', 'iao', 'iu', 'ian', 'iang', 'in', 'ing', 'ü', 'üe', 'üan',
-    'ün', 'iong'
+    'iang', 'iong', 'uang', 'ueng', 'ang', 'eng', 'ian', 'iao', 'ing',
+    'ong', 'uai', 'uan', 'üan', 'ai', 'an', 'ao', 'ei', 'en', 'er',
+    'ia', 'ie', 'in', 'iu', 'ou', 'ua', 'ui', 'un', 'uo', 'üe', 'ün',
+    'a', 'e', 'i', 'o', 'u', 'ü'
 ]
+
 OTHERS = [
-    'a', 'o', 'e', 'ai', 'ei', 'ao', 'ou', 'an', 'ang', 'en', 'eng',
-    'er', 'wu', 'wa', 'wo', 'wai', 'wei', 'wan', 'wang', 'wen', 'weng', 'yi',
-    'ya', 'ye', 'yao', 'you', 'yan', 'yang', 'yin', 'ying', 'yu', 'yue',
-    'yuan', 'yun', 'yong'
+    'wang', 'weng', 'yang', 'ying', 'yong', 'yuan', 'ang', 'eng',
+    'wai', 'wan', 'wei', 'wen', 'yan', 'yao', 'yin', 'you', 'yue',
+    'yun', 'ai', 'an', 'ao', 'ei', 'en', 'er', 'ou', 'wa', 'wo', 'wu',
+    'ya', 'ye', 'yi', 'yu', 'a', 'e', 'o'
 ]
 
+PINYIN_SINGLE_REGEX = '(?:%s)(?:%s)|(?:%s)' % (
+    '|'.join(INITIALS), '|'.join(FINALS), '|'.join(OTHERS)
+)
 
-INITIALS.sort(key=len, reverse=True)
-FINALS.sort(key=len, reverse=True)
-OTHERS.sort(key=len, reverse=True)
-
-r = '(?:%s)(?:%s)|(?:%s)' % ('|'.join(INITIALS), '|'.join(FINALS), '|'.join(OTHERS))
-r2 = '^((?:%s)(?:%s)|(?:%s))+$' % ('|'.join(INITIALS), '|'.join(FINALS), '|'.join(OTHERS))
 UNICODE_ACCENT_TO_TONE_NUMBER = {
-        ' WITH MACRON': '1',
-        ' WITH ACUTE': '2',
-        ' WITH CARON': '3',
-        ' WITH GRAVE': '4',
+        'MACRON': '1',
+        'ACUTE': '2',
+        'CARON': '3',
+        'GRAVE': '4',
 }
 
-def pinyin_unicode_to_ascii(pinyin_unicode):
+
+def pinyin_unicode_to_digits(pinyin_unicode):
     no_tones = ''
     tones = []
     for c in pinyin_unicode:
         n = unicodedata.name(c)
         for accent in UNICODE_ACCENT_TO_TONE_NUMBER:
             if accent in n:
-                n = n.replace(accent, '')
+                n = n.replace(' WITH %s' % accent, '')
+                n = n.replace(' AND %s' % accent, '')
                 tones.append(UNICODE_ACCENT_TO_TONE_NUMBER[accent])
         no_tones += unicodedata.lookup(n)
-    pinyin = re.findall(r, no_tones)
+    pinyin = re.findall(PINYIN_SINGLE_REGEX, no_tones)
     return pinyin, no_tones, tones
 
 
@@ -77,6 +80,7 @@ def get_cached(url, cache_dir):
         f.write(t)
         return t
 
+
 def download_from_wikimedia(fname, out_path, cache_dir):
     url = 'https://commons.wikimedia.org/wiki/File:' + fname
     h = lxml.html.fromstring(get_cached(url, cache_dir))
@@ -89,21 +93,29 @@ def download_from_wikimedia(fname, out_path, cache_dir):
     if not os.path.exists(os.path.join('output', fn)):
         subprocess.call(['wget', '-q', target_url, '-O', out_path])
 
+
+def download_if_valid_pinyin(out_dir, cache_dir, fname):
+    pinyin_unicode = fname.split('/')[-1].split('-')[1].split('.')[0]
+    pinyin_items, no_tones, tones = pinyin_unicode_to_digits(pinyin_unicode)
+    as_ascii_joined = '_'.join([''.join(x) for x in zip(pinyin_items, tones)])
+    out_path = os.path.join(out_dir, '%s.ogg' % as_ascii_joined)
+    if re.match('^(%s)+$' % PINYIN_SINGLE_REGEX, no_tones):
+        if pinyin_items and len(tones) == len(pinyin_items):
+            download_from_wikimedia(fname, out_path, cache_dir)
+
+
 def main(out_dir, cache_dir):
     cmd = (
-        "curl %s | bzcat | egrep -i --only-matching 'zh-[^.=]*\.ogg'"
-    ) % DUMP_URL
+        "bzcat wiktionary/enwiktionary-20190201-pages-meta-current.xml.bz2 |"
+        #"curl %(url)s | bzcat | "
+        "egrep -i --only-matching 'zh-[^.=]*\\.ogg'"
+    ) % {'url': DUMP_URL}
     fnames_f = subprocess.Popen(
         cmd, shell=True, stdout=subprocess.PIPE
     ).stdout
     for fname in fnames_f:
-        fname = fname.decode()
-        pinyin_unicode = fname.split('/')[-1].split('-')[1].split('.')[0]
-        pinyin, no_tones, tones = pinyin_unicode_to_ascii(pinyin_unicode)
-        as_ascii_joined = '_'.join([''.join(x) for x in zip(pinyin, tones)])
-        out_path = os.path.join(out_dir, '%s.ogg' % as_ascii_joined)
-        if pinyin and re.match(r2, no_tones) and len(tones) == len(pinyin):
-            download_from_wikimedia(fname, out_path, cache_dir)
+        download_if_valid_pinyin(out_dir, cache_dir, fname.decode().strip())
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
