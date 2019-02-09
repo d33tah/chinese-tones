@@ -106,8 +106,8 @@ def download_if_valid_pinyin(out_dir, cache_dir, fname):
 
 def main(out_dir, cache_dir):
     cmd = (
-        "bzcat wiktionary/enwiktionary-20190201-pages-meta-current.xml.bz2 |"
-        #"curl %(url)s | bzcat | "
+        # "bzcat wiktionary/enwiktionary-20190201-pages-meta-current.xml.bz2 |"
+        "curl %(url)s | bzcat | "
         "egrep -i --only-matching 'zh-[^.=]*\\.ogg'"
     ) % {'url': DUMP_URL}
     fnames_f = subprocess.Popen(
