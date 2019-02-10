@@ -1,10 +1,5 @@
 #!/usr/bin/env python
 
-import sqlite3
-import json
-import re
-import subprocess
-import sys
 import os
 import random
 
@@ -17,27 +12,20 @@ app.config.from_object(__name__)
 Session(app)
 
 devnull = open(os.devnull)
-
-conn = sqlite3.connect('anki/collection.anki2')
-flds = []
-for row in conn.execute('select flds from notes order by random()'):
-    flds.append(row[0])
-
-with open('anki/media') as f:
-    j = json.loads(f.read())
-    j_reversed = {value: key for key, value in j.items()}
+sounds = os.listdir('sounds')
 
 
 @app.route('/sample/<path:path>')
 def send_sample(path):
-    return send_from_directory('anki', path)
+    return send_from_directory('sounds', path)
+
 
 @app.route('/')
 def main():
 
     score = session.get('score', 0)
     num_questions = session.get('num_questions', 0)
-    
+
     # build answer string
     d = {}
     for key, value in sorted(request.args.items()):
@@ -51,7 +39,6 @@ def main():
     # Compare answer with the one from the previous question
     answer = 'Welcome to Chinese Tones!'
     if u_answer and 'tones' in session:
-        add_score = 0
         if session['tones'] == u_answer:
             answer = 'OK'
             score += 1
@@ -63,28 +50,26 @@ def main():
     session['score'] = score
     session['num_questions'] = num_questions
 
-    fld = random.choice(flds)
-
-    media_file = fld[fld.rfind('['):].split(':')[1].split(']')[0]
-    character = media_file.split('.')[0]
-
-    path = '/sample/' + j_reversed[media_file]
-    fld_tones = re.findall('"[^"]+"', fld)
-    tones = ''.join([x[-2] for x in fld_tones if x != '"colored"'])
+    path = '/sample/%s' % random.choice(sounds)
+    pinyin_with_tones = path.split('/')[-1][:-len('.ogg')].split('_')
+    tones = ''.join(x[-1] for x in pinyin_with_tones)
+    pinyin_without_tones = [x[:-1] for x in pinyin_with_tones]
 
     session['tones'] = tones
     session['previous_sample'] = path
 
     perc = '%0.2f%%' % (100.0 * score/num_questions) if num_questions else '0%'
-    return render_template('main.html',
+    return render_template(
+        'main.html',
         path=path,
         answer=answer,
         placeholder=('?' * len(tones)),
-        character=character,
+        pinyin_without_tones=pinyin_without_tones,
         score=score,
         num_questions=num_questions,
         perc=perc,
     )
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0')

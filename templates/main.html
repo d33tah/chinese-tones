@@ -18,16 +18,16 @@
 <body>
   <main role="main" class="container">
     <h1>{{ answer|safe }}</h1>
-    <h2>{{ score }} / {{ num_questions }} ({{ perc }}) {{ character }}</h2>
+    <h2>{{ score }} / {{ num_questions }} ({{ perc }}) {{ pinyin_without_tones|join('') }}</h2>
     <audio autoplay="autoplay" controls=
     ""><source src="{{ path }}" type="audio/mpeg"></audio>
     <form>
       
-           {% for char_no in range(character|length) %}
+           {% for char_no in range(pinyin_without_tones|length) %}
       <p>     
 
       <div class="btn-group btn-group-toggle" data-toggle="buttons">
-            <label style="cursor: auto;" class="btn btn-info disabled">{{ character[char_no] }} </label>
+            <label style="cursor: auto;" class="btn btn-info disabled">{{ pinyin_without_tones[char_no] }} </label>
 
       {% for tone in range(1, 6) %}
   <label class="btn btn-secondary">
