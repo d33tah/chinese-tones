@@ -13,6 +13,7 @@ Session(app)
 
 devnull = open(os.devnull)
 sounds = os.listdir('sounds')
+TONE_NAMES = {1: 'flat', 2: 'rising', 3: 'dipping', 4: 'falling', 5: 'neutral'}
 
 
 @app.route('/sample/<path:path>')
@@ -68,6 +69,7 @@ def main():
         score=score,
         num_questions=num_questions,
         perc=perc,
+        tones=TONE_NAMES,
     )
 
 
