@@ -62,8 +62,11 @@ UNICODE_ACCENT_TO_TONE_NUMBER = {
 def pinyin_unicode_to_digits(pinyin_unicode):
     """Convert Pinyin that has tone encoded in diacritic marks to one that has
     tones encoded in ASCII. For example:
+
     >>> pinyin_unicode_to_digits('nǚrén')
     (['nü', 'ren'], 'nüren', ['3', '2'])
+
+    There is currently no error checking.
     """
     no_tones = ''
     tones = []
