@@ -85,19 +85,25 @@ def pinyin_unicode_to_digits(pinyin_unicode):
 def get_cached(url, cache_dir):
     """Download a file, optionally trying to read it from cache_dir instead if
     that variable is not empty."""
+
+    if cache_dir:
+        b64 = base64.b64encode(url.encode()).decode().replace('/', '_')
+        fname = os.path.join(cache_dir, b64)
+    else:
+        fname = None
+
     try:
         if cache_dir:
-            b64 = base64.b64encode(url.encode()).decode().replace('/', '_')
-            fname = os.path.join(cache_dir, b64)
             with open(fname) as f:
                 return f.read()
     except IOError:
         pass
 
-    with open(fname, 'w') as f:
-        t = requests.get(url).text
-        f.write(t)
-        return t
+    t = requests.get(url).text
+    if fname:
+        with open(fname, 'w') as f:
+            f.write(t)
+    return t
 
 
 def download_from_wikimedia(fname, out_path, cache_dir):
@@ -123,8 +129,9 @@ def download_if_valid_pinyin(out_dir, cache_dir, fname):
     as_ascii_joined = '_'.join([''.join(x) for x in zip(pinyin_items, tones)])
     out_path = os.path.join(out_dir, '%s.ogg' % as_ascii_joined)
     if re.match('^(%s)+$' % PINYIN_SINGLE_REGEX, no_tones):
-        if pinyin_items and len(tones) == len(pinyin_items):
-            download_from_wikimedia(fname, out_path, cache_dir)
+        if no_tones == ''.join(pinyin_items):
+            if pinyin_items and len(tones) == len(pinyin_items):
+                download_from_wikimedia(fname, out_path, cache_dir)
 
 
 def main(out_dir, cache_dir):
@@ -145,6 +152,6 @@ def main(out_dir, cache_dir):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--cache-dir')
-    parser.add_argument('--out-dir')
+    parser.add_argument('--out-dir', required=True)
     args = parser.parse_args()
     main(**args.__dict__)
