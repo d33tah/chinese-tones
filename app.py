@@ -40,6 +40,7 @@ def main():
     # Compare answer with the one from the previous question
     answer = 'Welcome to Chinese Tones!'
     if u_answer and 'tones' in session:
+        u_answer = u_answer[:len(session['tones'])]
         if session['tones'] == u_answer:
             answer = 'OK'
             score += 1
