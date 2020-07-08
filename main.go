@@ -5,9 +5,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-
-	"github.com/gorilla/mux"
-	"github.com/palantir/stacktrace"
 )
 
 func Home() http.HandlerFunc {
@@ -36,20 +33,18 @@ func Home() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		err = tpl.ExecuteTemplate(w, "main.html", m)
 		if err != nil {
-			log.Println(stacktrace.Propagate(err, "Can’t load template"))
+			log.Println("Can’t load template", err)
 		}
 	}
 }
 
 func main() {
 	logger := log.New(os.Stdout, "rentweb: ", log.LstdFlags)
-	r := mux.NewRouter()
-	r.HandleFunc("/", Home())
 
-	staticDir := "/sounds/"
-	r.
-		PathPrefix(staticDir).
-		Handler(http.StripPrefix(staticDir, http.FileServer(http.Dir("."+staticDir))))
+	fs := http.FileServer(http.Dir("./sounds"))
+	http.Handle("/sounds/", http.StripPrefix("/sounds/", fs))
+	http.HandleFunc("/", Home())
 
-	logger.Fatal(http.ListenAndServe(":2137", r))
+	log.Println("Starting")
+	logger.Fatal(http.ListenAndServe(":2137", nil))
 }
