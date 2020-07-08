@@ -17,27 +17,27 @@
 </head>
 <body>
   <main role="main" class="container">
-    <h1>{{ answer|safe }}</h1>
-    <h2>{{ score }} / {{ num_questions }} ({{ perc }})</h2>
+    <h1>{{ .answer }}</h1>
+    <h2>{{ .score }} / {{ .num_questions }} ({{ .perc }})</h2>
     <audio autoplay="autoplay" controls=
-    ""><source src="{{ path }}" type="audio/mpeg"></audio>
+    ""><source src="{{ .path }}" type="audio/mpeg"></audio>
     <form>
 
-           {% for char_no in range(pinyin_without_tones|length) %}
+           {{ range $char_no := .pinyin_without_tones_length }}
       <p>
 
       <div class="btn-group btn-group-toggle" data-toggle="buttons">
-            <label style="cursor: auto;" class="btn btn-info disabled">{{ pinyin_without_tones[char_no] }} </label>
+            <label style="cursor: auto;" class="btn btn-info disabled">{{ index .pinyin_without_tones $char_no }} </label>
 
-      {% for tone in range(1, 6) %}
+      {{ range $tone := .tones }}
   <label class="btn btn-secondary">
-    <input type="radio" name="answer-{{ char_no }}-{{ tone }}" id="option{{ char_no }}-{{ tone }}" autocomplete="off" > {{ tone }} ({{ tones[tone] }})
+    <input type="radio" name="answer-{{ $char_no }}-{{ $tone }}" id="option{{ $char_no }}-{{ .tone }}" autocomplete="off" > {{ $tone }} ({{ index .tones $tone }})
   </label>
-{% endfor %}
+{{ end }}
   </div>
 </p>
 
-{% endfor %}
+{{ end }}
 <div>
       <input type="submit" class="btn btn-info"></div>
 
