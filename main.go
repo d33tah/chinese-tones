@@ -18,7 +18,7 @@ func Home() http.HandlerFunc {
 	}
 
     m := map[string]interface{}{
-        "path": "/sample/jie2.ogg",
+        "path": "/sounds/jie2.ogg",
         "answer": "Welcome to Chinese Tones",
         "placeholder": "?",
         "pinyin_without_tones": []string{"jie"},
@@ -46,5 +46,11 @@ func main() {
 	logger := log.New(os.Stdout, "rentweb: ", log.LstdFlags)
 	r := mux.NewRouter()
 	r.HandleFunc("/", Home())
+
+	staticDir := "/sounds/"
+	r.
+		PathPrefix(staticDir).
+		Handler(http.StripPrefix(staticDir, http.FileServer(http.Dir("."+staticDir))))
+
 	logger.Fatal(http.ListenAndServe(":2137", r))
 }
