@@ -13,8 +13,7 @@ import (
 func Home() http.HandlerFunc {
 	tpl, err := template.New("main").ParseGlob(`templates/*.html`)
 	if err != nil {
-		logger := log.New(os.Stdout, "rentweb: ", log.LstdFlags)
-		logger.Fatal(err)
+		log.Fatal(err)
 	}
 
     m := map[string]interface{}{
