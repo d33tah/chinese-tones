@@ -7,7 +7,7 @@ import (
 	"os"
 
 	"github.com/gorilla/mux"
-    "github.com/palantir/stacktrace"
+	"github.com/palantir/stacktrace"
 )
 
 func Home() http.HandlerFunc {
@@ -16,28 +16,28 @@ func Home() http.HandlerFunc {
 		log.Fatal(err)
 	}
 
-    m := map[string]interface{}{
-        "path": "/sounds/jie2.ogg",
-        "answer": "Welcome to Chinese Tones",
-        "placeholder": "?",
-        "pinyin_without_tones": []string{"jie"},
-        "pinyin_without_tones_length": 1,
-        "score": 0,
-        "num_questions": 0,
-        "perc": "0%",
-        "tones": map[string]string{
-            "1": "flat",
-            "2": "rising",
-            "3": "dipping",
-            "4": "falling",
-            "5": "neutral",
-        },
-    }
+	m := map[string]interface{}{
+		"path":                        "/sounds/jie2.ogg",
+		"answer":                      "Welcome to Chinese Tones",
+		"placeholder":                 "?",
+		"pinyin_without_tones":        []string{"jie"},
+		"pinyin_without_tones_length": 1,
+		"score":                       0,
+		"num_questions":               0,
+		"perc":                        "0%",
+		"tones": map[string]string{
+			"1": "flat",
+			"2": "rising",
+			"3": "dipping",
+			"4": "falling",
+			"5": "neutral",
+		},
+	}
 	return func(w http.ResponseWriter, r *http.Request) {
 		err = tpl.ExecuteTemplate(w, "main.html", m)
-        if err != nil {
-            log.Println(stacktrace.Propagate(err, "Can’t load template"))
-        }
+		if err != nil {
+			log.Println(stacktrace.Propagate(err, "Can’t load template"))
+		}
 	}
 }
 
