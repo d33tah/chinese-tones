@@ -1,88 +1,97 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta name="generator" content=
-  "HTML Tidy for HTML5 for Linux version 5.2.0">
-  <meta charset="utf-8">
-  <meta name="viewport" content=
-  "width=device-width, initial-scale=1, shrink-to-fit=no">
-  <meta name="description" content="">
-  <meta name="author" content=
-  "Mark Otto, Jacob Thornton, and Bootstrap contributors">
-  <meta name="generator" content="Jekyll v3.8.5">
-  <title>Chinese Tones</title><!-- Bootstrap core CSS -->
-  <link href=
-  "https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css"
-  rel="stylesheet" crossorigin="anonymous">
-</head>
-<body>
-  <main role="main" class="container">
-    <h1>{{ .answer }}</h1>
-    <h2>{{ .score }} / {{ .num_questions }} ({{ .perc }})</h2>
-    <audio autoplay="autoplay" controls=
-    ""><source src="{{ .path }}" type="audio/mpeg"></audio>
-    <form>
+    <head>
+        <meta name="generator" content=
+                    "HTML Tidy for HTML5 for Linux version 5.2.0">
+        <meta charset="utf-8">
+        <meta name="viewport" content=
+                    "width=device-width, initial-scale=1, shrink-to-fit=no">
+        <meta name="description" content="">
+        <meta name="author" content=
+                    "Mark Otto, Jacob Thornton, and Bootstrap contributors">
+        <meta name="generator" content="Jekyll v3.8.5">
+        <title>Chinese Tones</title><!-- Bootstrap core CSS -->
+        <link href=
+        "https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css"
+              rel="stylesheet" crossorigin="anonymous">
+    </head>
+    <body>
+        <main role="main" class="container">
+            <h1>{{ .answer }}</h1>
+            <h2>{{ .score }} / {{ .num_questions }} ({{ .perc }})</h2>
+            <audio autoplay="autoplay" controls=
+                             ""><source src="{{ .path }}" type="audio/mpeg"></audio>
+            <form>
 
-           {{ range $char_no := .pinyin_without_tones_length }}
-      <p>
+                {{ $tones := .tones }}
 
-      <div class="btn-group btn-group-toggle" data-toggle="buttons">
-            <label style="cursor: auto;" class="btn btn-info disabled">{{ index .pinyin_without_tones $char_no }} </label>
+                {{ range $char_no, $pinyin := .pinyin_without_tones }}
+                <p>
 
-      {{ range $tone := .tones }}
-  <label class="btn btn-secondary">
-    <input type="radio" name="answer-{{ $char_no }}-{{ $tone }}" id="option{{ $char_no }}-{{ .tone }}" autocomplete="off" > {{ $tone }} ({{ index .tones $tone }})
-  </label>
-{{ end }}
-  </div>
-</p>
-
-{{ end }}
-<div>
-      <input type="submit" class="btn btn-info"></div>
+                <div class="btn-group btn-group-toggle" data-toggle="buttons">
+                    <label style="cursor: auto;" class="btn btn-info disabled">{{ $pinyin }} </label>
 
 
+                    {{ range $tone, $tone_label := $tones }}
+                    <label class="btn btn-secondary">
+                        <input
+                            type="radio"
+                            name="answer-{{ $char_no }}-{{ $tone }}"
+                            id="option{{ $char_no }}-{{ $tone }}"
+                            autocomplete="off" > {{ $tone }} ({{ $tone_label }})
+                    </label>
+                    {{ end }}
 
-    </form>
-  </main>
+                </div>
+                </p>
+                {{ end }}
 
-  <!-- Matomo -->
-<script type="text/javascript">
-  var _paq = window._paq || [];
-  /* tracker methods like "setCustomDimension" should be called before "trackPageView" */
-  _paq.push(['trackPageView']);
-  _paq.push(['enableLinkTracking']);
-  (function() {
+                <div>
+                    <input type="submit" class="btn btn-info">
+                </div>
+
+
+
+            </form>
+        </main>
+
+        <!-- Matomo -->
+        <script type="text/javascript">
+            var _paq = window._paq || [];
+/* tracker methods like "setCustomDimension" should be called before "trackPageView" */
+_paq.push(['trackPageView']);
+_paq.push(['enableLinkTracking']);
+(function() {
     var u="//piwik.strokes.ovh/";
     _paq.push(['setTrackerUrl', u+'matomo.php']);
     _paq.push(['setSiteId', '1']);
     var d=document, g=d.createElement('script'), s=d.getElementsByTagName('script')[0];
     g.type='text/javascript'; g.async=true; g.defer=true; g.src=u+'matomo.js'; s.parentNode.insertBefore(g,s);
-  })();
-</script>
-<!-- End Matomo Code -->
+})();
+        </script>
+        <!-- End Matomo Code -->
 
 
-  <footer class="page-footer font-small blue pt-4">
-    <div class="container">
-    <p>Developed by d33tah, code hosted on
-    <a href="https://github.com/d33tah/chinese-tones">Github</a>.
-    Sound samples taken from <a href="https://en.wiktionary.org">en.wiktionary.org</a>.</p>
-    <p>GDPR notice: this website collects information about your interactions
-    with it for analytic purposes. If you're uncomfortable with sharing them,
-    click <a href="https://piwik.strokes.ovh/index.php?module=CoreAdminHome&action=optOut">here</a> to opt out.</p>
-    </div>
-  </footer>
-  <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
-  integrity=
-  "sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
-  crossorigin="anonymous">
-  </script>
-  <script>
-  window.jQuery || document.write('<script src="/docs/4.2/assets/js/vendor/jquery-slim.min.js"><\/script>')
-  </script>
-  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js"
-  crossorigin="anonymous">
-  </script>
-</body>
+        <footer class="page-footer font-small blue pt-4">
+            <div class="container">
+                <p>Developed by d33tah, code hosted on
+                <a href="https://github.com/d33tah/chinese-tones">Github</a>.
+                Sound samples taken from <a href="https://en.wiktionary.org">en.wiktionary.org</a>.</p>
+                <p>GDPR notice: this website collects information about your interactions
+                with it for analytic purposes. If you're uncomfortable with sharing them,
+                click <a href="https://piwik.strokes.ovh/index.php?module=CoreAdminHome&action=optOut">here</a> to opt out.</p>
+            </div>
+        </footer>
+        <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+                integrity=
+                "sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+                crossorigin="anonymous">
+        </script>
+        <script>
+            window.jQuery || document.write('<script src="/docs/4.2/assets/js/vendor/jquery-slim.min.js"><\/script>')
+            </script>
+            <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js"
+                    crossorigin="anonymous">
+            </script>
+    </body>
 </html>
