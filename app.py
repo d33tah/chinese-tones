@@ -61,8 +61,7 @@ def main():
     session['previous_sample'] = path
 
     perc = '%0.2f%%' % (100.0 * score/num_questions) if num_questions else '0%'
-    return render_template(
-        'main.html',
+    args = dict(
         path=path,
         answer=answer,
         placeholder=('?' * len(tones)),
@@ -71,6 +70,11 @@ def main():
         num_questions=num_questions,
         perc=perc,
         tones=TONE_NAMES,
+    )
+    print(args)
+    return render_template(
+        'main.html',
+        **args
     )
 
 
