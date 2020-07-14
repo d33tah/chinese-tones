@@ -7,7 +7,7 @@ import (
 	"os"
 )
 
-func Home() http.HandlerFunc {
+func home() http.HandlerFunc {
 	tpl, err := template.New("main").ParseGlob(`templates/*.html`)
 	if err != nil {
 		log.Fatal(err)
@@ -43,7 +43,7 @@ func main() {
 
 	fs := http.FileServer(http.Dir("./sounds"))
 	http.Handle("/sounds/", http.StripPrefix("/sounds/", fs))
-	http.HandleFunc("/", Home())
+	http.HandleFunc("/", home())
 
 	log.Println("Starting")
 	logger.Fatal(http.ListenAndServe(":2137", nil))
