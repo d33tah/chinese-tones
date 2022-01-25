@@ -4,6 +4,8 @@ import (
 	"html/template"
 	"log"
 	"net/http"
+	"os"
+	"strconv"
 )
 
 type response struct {
@@ -16,6 +18,28 @@ type response struct {
 	Num_questions               int
 	Perc                        string
 	Tones                       map[string]string
+}
+
+func extractAnswer(r *http.Request) string {
+	r.ParseForm()
+	answerNo := 0
+	enteredAnswer := ""
+	for {
+		wasResponseFound := false
+		for i := 1; i < 6; i++ {
+			key := "answer-" + strconv.Itoa(answerNo) + "-" + strconv.Itoa(i)
+			wartosc := r.Form.Get(key)
+			if wartosc != "" {
+				wasResponseFound = true
+				enteredAnswer += strconv.Itoa(i)
+			}
+		}
+		if !wasResponseFound {
+			break
+		}
+		answerNo += 1
+	}
+	return enteredAnswer
 }
 
 func home() http.HandlerFunc {
@@ -39,7 +63,8 @@ func home() http.HandlerFunc {
 		},
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
-		err := tpl.ExecuteTemplate(w, "main.html", m)
+		enteredAnswer := extractAnswer(r)
+		err = tpl.ExecuteTemplate(w, "main.html", m)
 		if err != nil {
 			log.Println("Can’t load template", err)
 		}
