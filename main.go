@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/gob"
 	"github.com/gorilla/sessions"
 	"html/template"
 	"io/ioutil"
@@ -97,12 +98,34 @@ func home(w http.ResponseWriter, r *http.Request) {
 		num_questions = 0
 	}
 
+	score, ok := session.Values["score"].(int)
+	if !ok {
+		score = 0
+	}
+
+	enteredAnswer := extractAnswer(r)
+
+	val := session.Values["previous_sound"]
+	var previous_sound = &sound{}
+	previous_sound, ok = val.(*sound)
+
+	log.Println(previous_sound)
+	answer := "Welcome to Chinese Tones"
+	if ok {
+		was_correct := previous_sound.CorrectTones == enteredAnswer
+		if was_correct {
+			score += 1
+			answer = "Correct!"
+		} else {
+			answer = "Incorrect. You answered " + enteredAnswer + ", but the correct answer was " + previous_sound.CorrectTones
+		}
+	}
 	randomIndex := rand.Intn(len(sounds))
 	sound := sounds[randomIndex]
 
 	m := response{
 		Path:                     "/sounds/" + sound.Path,
-		Answer:                   "Welcome to Chinese Tones",
+		Answer:                   answer,
 		Placeholder:              "?",
 		PinyinWithoutTones:       sound.PinyinWithoutTones,
 		PinyinWithoutTonesLength: 1,
@@ -118,10 +141,11 @@ func home(w http.ResponseWriter, r *http.Request) {
 		},
 	}
 
+	session.Values["sound"] = sound
+	session.Values["score"] = score
 	session.Values["num_questions"] = num_questions + 1
 	session.Save(r, w)
 
-	enteredAnswer := extractAnswer(r)
 	log.Println(enteredAnswer)
 	err := tpl.ExecuteTemplate(w, "main.html", m)
 	if err != nil {
@@ -131,6 +155,7 @@ func home(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	fs := http.FileServer(http.Dir("./sounds"))
+	gob.Register(&sound{})
 	http.Handle("/sounds/", http.StripPrefix("/sounds/", fs))
 	http.HandleFunc("/", home)
 
