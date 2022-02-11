@@ -5,21 +5,29 @@ import (
 	"html/template"
 	"io/ioutil"
 	"log"
+	"math/rand"
 	"net/http"
 	"regexp"
 	"strconv"
+	"strings"
 )
 
 type response struct {
-	Path                        string
-	Answer                      string
-	Placeholder                 string
-	Pinyin_without_tones        []string
-	Pinyin_without_tones_length int
-	Score                       int
-	Num_questions               int
-	Perc                        string
-	Tones                       map[string]string
+	Path                     string
+	Answer                   string
+	Placeholder              string
+	PinyinWithoutTones       []string
+	PinyinWithoutTonesLength int
+	Score                    int
+	NumQuestions             int
+	Perc                     string
+	Tones                    map[string]string
+}
+
+type sound struct {
+	Path               string
+	PinyinWithoutTones []string
+	CorrectTones       string
 }
 
 var (
@@ -28,15 +36,31 @@ var (
 	sounds = readSounds()
 )
 
-func readSounds() map[string]string {
-	ret := make(map[string]string)
+func delete_empty(s []string) []string {
+	var r []string
+	for _, str := range s {
+		if str != "" {
+			r = append(r, str)
+		}
+	}
+	return r
+}
+
+func readSounds() []sound {
+	var ret []sound
 	files, err := ioutil.ReadDir("sounds")
 	if err != nil {
 		log.Fatal(err)
 	}
-	re := regexp.MustCompile("[^0-9]")
+	re_not_digit := regexp.MustCompile("[^0-9]")
+	re_digit := regexp.MustCompile("[0-9_]")
 	for _, f := range files {
-		ret[f.Name()] = re.ReplaceAllString(f.Name(), "")
+		filename_without_extension := strings.Split(f.Name(), ".")[0]
+		ret = append(ret, sound{
+			Path:               f.Name(),
+			PinyinWithoutTones: delete_empty(re_digit.Split(filename_without_extension, -1)),
+			CorrectTones:       re_not_digit.ReplaceAllString(f.Name(), ""),
+		})
 	}
 	log.Println(ret)
 	return ret
@@ -73,15 +97,18 @@ func home(w http.ResponseWriter, r *http.Request) {
 		num_questions = 0
 	}
 
+	randomIndex := rand.Intn(len(sounds))
+	sound := sounds[randomIndex]
+
 	m := response{
-		Path:                        "/sounds/jie2.ogg",
-		Answer:                      "Welcome to Chinese Tones",
-		Placeholder:                 "?",
-		Pinyin_without_tones:        []string{"jie"},
-		Pinyin_without_tones_length: 1,
-		Score:                       0,
-		Num_questions:               num_questions,
-		Perc:                        "0%",
+		Path:                     "/sounds/" + sound.Path,
+		Answer:                   "Welcome to Chinese Tones",
+		Placeholder:              "?",
+		PinyinWithoutTones:       sound.PinyinWithoutTones,
+		PinyinWithoutTonesLength: 1,
+		Score:                    0,
+		NumQuestions:             num_questions,
+		Perc:                     "0%",
 		Tones: map[string]string{
 			"1": "flat",
 			"2": "rising",

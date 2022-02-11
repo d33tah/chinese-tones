@@ -18,14 +18,14 @@
     <body>
         <main role="main" class="container">
             <h1>{{ .Answer }}</h1>
-            <h2>{{ .Score }} / {{ .Num_questions }} ({{ .Perc }})</h2>
+            <h2>{{ .Score }} / {{ .NumQuestions }} ({{ .Perc }})</h2>
             <audio autoplay="autoplay" controls=
                              ""><source src="{{ .Path }}" type="audio/mpeg"></audio>
             <form>
 
                 {{ $tones := .Tones }}
 
-                {{ range $char_no, $pinyin := .Pinyin_without_tones }}
+                {{ range $char_no, $pinyin := .PinyinWithoutTones }}
                 <p>
 
                 <div class="btn-group btn-group-toggle" data-toggle="buttons">
