@@ -23,7 +23,7 @@
                              ""><source src="{{ .Path }}" type="audio/mpeg"></audio>
             <form>
 
-                {{ $tones := .Tones }}
+                {{ $tones := .ToneNames }}
 
                 {{ range $char_no, $pinyin := .PinyinWithoutTones }}
                 <p>

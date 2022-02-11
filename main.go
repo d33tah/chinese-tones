@@ -16,13 +16,13 @@ import (
 
 type response struct {
 	Path                     string
-	Answer                   string
+	Message                  string
 	PinyinWithoutTones       []string
 	PinyinWithoutTonesLength int
 	Score                    int
 	NumQuestions             int
 	Perc                     string
-	Tones                    map[string]string
+	ToneNames                map[string]string
 }
 
 type sound struct {
@@ -32,9 +32,16 @@ type sound struct {
 }
 
 var (
-	key    = []byte("super-secret-key")
-	store  = sessions.NewCookieStore(key)
-	sounds = readSounds()
+	key       = []byte("super-secret-key")
+	store     = sessions.NewCookieStore(key)
+	sounds    = readSounds()
+	toneNames = map[string]string{
+		"1": "flat",
+		"2": "rising",
+		"3": "dipping",
+		"4": "falling",
+		"5": "neutral",
+	}
 )
 
 func deleteEmpty(s []string) []string {
@@ -76,7 +83,7 @@ func extractAnswer(r *http.Request) string {
 	for {
 		wasResponseFound := false
 		for i := 1; i < 6; i++ {
-			key := "answer-" + strconv.Itoa(answerNo) + "-" + strconv.Itoa(i)
+			key := "message-" + strconv.Itoa(answerNo) + "-" + strconv.Itoa(i)
 			value := r.Form.Get(key)
 			if value != "" {
 				wasResponseFound = true
@@ -112,37 +119,33 @@ func home(w http.ResponseWriter, r *http.Request) {
 	previous_sound, ok = val.(*sound)
 
 	log.Println(previous_sound)
-	answer := "Welcome to Chinese Tones"
+
+	message := "Welcome to Chinese Tones"
 	if ok {
 		if previous_sound.CorrectTones == enteredAnswer {
 			score += 1
-			answer = "Correct!"
+			message = "Correct!"
 		} else {
-			answer = fmt.Sprintf(
-				"Incorrect. You answered %s,"+
-					" but the correct answer was %s",
+			message = fmt.Sprintf(
+				"Incorrect. You messageed %s,"+
+					" but the correct message was %s",
 				enteredAnswer,
 				previous_sound.CorrectTones)
 		}
 	}
+
 	randomIndex := rand.Intn(len(sounds))
 	sound := sounds[randomIndex]
 	perc := fmt.Sprintf("%.02f%%", 100.0*float64(score)/float64(num_questions))
 	m := response{
 		Path:                     "/sounds/" + sound.Path,
-		Answer:                   answer,
+		Message:                  message,
 		PinyinWithoutTones:       sound.PinyinWithoutTones,
 		PinyinWithoutTonesLength: 1,
 		Score:                    score,
 		NumQuestions:             num_questions,
 		Perc:                     perc,
-		Tones: map[string]string{
-			"1": "flat",
-			"2": "rising",
-			"3": "dipping",
-			"4": "falling",
-			"5": "neutral",
-		},
+		ToneNames:                toneNames,
 	}
 
 	session.Values["sound"] = sound
