@@ -60,18 +60,18 @@ func readSounds() []sound {
 	if err != nil {
 		log.Fatal(err)
 	}
-	re_not_digit := regexp.MustCompile("[^0-9]")
-	re_digit := regexp.MustCompile("[0-9_]")
+	reNotDigit := regexp.MustCompile("[^0-9]")
+	reDigit := regexp.MustCompile("[0-9_]")
 	for _, f := range files {
-		filename_without_extension := strings.Split(f.Name(), ".")[0]
+		filenameWithoutExtension := strings.Split(f.Name(), ".")[0]
 		ret = append(ret, sound{
 			Path: f.Name(),
 			// convert e.g. jie2guo3 into ["jie", "guo"]
 			PinyinWithoutTones: deleteEmpty(
-				re_digit.Split(
-					filename_without_extension, -1)),
+				reDigit.Split(
+					filenameWithoutExtension, -1)),
 			// jie2guo3.ogg becomes 23
-			CorrectTones: re_not_digit.ReplaceAllString(f.Name(), ""),
+			CorrectTones: reNotDigit.ReplaceAllString(f.Name(), ""),
 		})
 	}
 	return ret
@@ -103,9 +103,9 @@ func home(w http.ResponseWriter, r *http.Request) {
 	tpl := template.Must(template.New("main").ParseGlob(`templates/*.html`))
 	session, _ := store.Get(r, "cookie-name")
 
-	num_questions, ok := session.Values["num_questions"].(int)
+	numQuestions, ok := session.Values["numQuestions"].(int)
 	if !ok {
-		num_questions = 0
+		numQuestions = 0
 	}
 
 	score, ok := session.Values["score"].(int)
@@ -116,12 +116,12 @@ func home(w http.ResponseWriter, r *http.Request) {
 	enteredAnswer := extractAnswer(r)
 
 	val := session.Values["sound"]
-	var previous_sound = &sound{}
-	previous_sound, ok = val.(*sound)
+	var previousSound = &sound{}
+	previousSound, ok = val.(*sound)
 
 	message := "Welcome to Chinese Tones"
 	if ok {
-		if previous_sound.CorrectTones == enteredAnswer {
+		if previousSound.CorrectTones == enteredAnswer {
 			score += 1
 			message = "Correct!"
 		} else {
@@ -129,27 +129,27 @@ func home(w http.ResponseWriter, r *http.Request) {
 				"Incorrect. You messageed %s,"+
 					" but the correct message was %s",
 				enteredAnswer,
-				previous_sound.CorrectTones)
+				previousSound.CorrectTones)
 		}
 	}
 
 	randomIndex := rand.Intn(len(sounds))
 	sound := sounds[randomIndex]
-	perc := fmt.Sprintf("%.02f%%", 100.0*float64(score)/float64(num_questions))
+	perc := fmt.Sprintf("%.02f%%", 100.0*float64(score)/float64(numQuestions))
 	m := response{
 		Path:                     "/sounds/" + sound.Path,
 		Message:                  message,
 		PinyinWithoutTones:       sound.PinyinWithoutTones,
 		PinyinWithoutTonesLength: 1,
 		Score:                    score,
-		NumQuestions:             num_questions,
+		NumQuestions:             numQuestions,
 		Perc:                     perc,
 		ToneNames:                toneNames,
 	}
 
 	session.Values["sound"] = sound
 	session.Values["score"] = score
-	session.Values["num_questions"] = num_questions + 1
+	session.Values["numQuestions"] = numQuestions + 1
 	session.Save(r, w)
 
 	err := tpl.ExecuteTemplate(w, "main.html", m)
