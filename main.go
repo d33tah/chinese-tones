@@ -74,8 +74,8 @@ func extractAnswer(r *http.Request) string {
 		wasResponseFound := false
 		for i := 1; i < 6; i++ {
 			key := "answer-" + strconv.Itoa(answerNo) + "-" + strconv.Itoa(i)
-			wartosc := r.Form.Get(key)
-			if wartosc != "" {
+			value := r.Form.Get(key)
+			if value != "" {
 				wasResponseFound = true
 				enteredAnswer += strconv.Itoa(i)
 			}
