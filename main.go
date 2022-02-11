@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/gob"
+	"fmt"
 	"github.com/gorilla/sessions"
 	"html/template"
 	"io/ioutil"
@@ -16,7 +17,6 @@ import (
 type response struct {
 	Path                     string
 	Answer                   string
-	Placeholder              string
 	PinyinWithoutTones       []string
 	PinyinWithoutTonesLength int
 	Score                    int
@@ -37,7 +37,7 @@ var (
 	sounds = readSounds()
 )
 
-func delete_empty(s []string) []string {
+func deleteEmpty(s []string) []string {
 	var r []string
 	for _, str := range s {
 		if str != "" {
@@ -58,9 +58,11 @@ func readSounds() []sound {
 	for _, f := range files {
 		filename_without_extension := strings.Split(f.Name(), ".")[0]
 		ret = append(ret, sound{
-			Path:               f.Name(),
-			PinyinWithoutTones: delete_empty(re_digit.Split(filename_without_extension, -1)),
-			CorrectTones:       re_not_digit.ReplaceAllString(f.Name(), ""),
+			Path: f.Name(),
+			PinyinWithoutTones: deleteEmpty(
+				re_digit.Split(
+					filename_without_extension, -1)),
+			CorrectTones: re_not_digit.ReplaceAllString(f.Name(), ""),
 		})
 	}
 	log.Println(ret)
@@ -105,33 +107,35 @@ func home(w http.ResponseWriter, r *http.Request) {
 
 	enteredAnswer := extractAnswer(r)
 
-	val := session.Values["previous_sound"]
+	val := session.Values["sound"]
 	var previous_sound = &sound{}
 	previous_sound, ok = val.(*sound)
 
 	log.Println(previous_sound)
 	answer := "Welcome to Chinese Tones"
 	if ok {
-		was_correct := previous_sound.CorrectTones == enteredAnswer
-		if was_correct {
+		if previous_sound.CorrectTones == enteredAnswer {
 			score += 1
 			answer = "Correct!"
 		} else {
-			answer = "Incorrect. You answered " + enteredAnswer + ", but the correct answer was " + previous_sound.CorrectTones
+			answer = fmt.Sprintf(
+				"Incorrect. You answered %s,"+
+					" but the correct answer was %s",
+				enteredAnswer,
+				previous_sound.CorrectTones)
 		}
 	}
 	randomIndex := rand.Intn(len(sounds))
 	sound := sounds[randomIndex]
-
+	perc := fmt.Sprintf("%.02f%%", 100.0*float64(score)/float64(num_questions))
 	m := response{
 		Path:                     "/sounds/" + sound.Path,
 		Answer:                   answer,
-		Placeholder:              "?",
 		PinyinWithoutTones:       sound.PinyinWithoutTones,
 		PinyinWithoutTonesLength: 1,
-		Score:                    0,
+		Score:                    score,
 		NumQuestions:             num_questions,
-		Perc:                     "0%",
+		Perc:                     perc,
 		Tones: map[string]string{
 			"1": "flat",
 			"2": "rising",
