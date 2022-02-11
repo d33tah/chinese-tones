@@ -4,7 +4,6 @@ import (
 	"html/template"
 	"log"
 	"net/http"
-	"os"
 	"strconv"
 )
 
@@ -64,7 +63,8 @@ func home() http.HandlerFunc {
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
 		enteredAnswer := extractAnswer(r)
-		err = tpl.ExecuteTemplate(w, "main.html", m)
+        log.Println(enteredAnswer)
+        err := tpl.ExecuteTemplate(w, "main.html", m)
 		if err != nil {
 			log.Println("Can’t load template", err)
 		}
