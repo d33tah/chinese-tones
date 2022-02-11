@@ -66,13 +66,14 @@ func readSounds() []sound {
 		filename_without_extension := strings.Split(f.Name(), ".")[0]
 		ret = append(ret, sound{
 			Path: f.Name(),
+			// convert e.g. jie2guo3 into ["jie", "guo"]
 			PinyinWithoutTones: deleteEmpty(
 				re_digit.Split(
 					filename_without_extension, -1)),
+			// jie2guo3.ogg becomes 23
 			CorrectTones: re_not_digit.ReplaceAllString(f.Name(), ""),
 		})
 	}
-	log.Println(ret)
 	return ret
 }
 
@@ -118,8 +119,6 @@ func home(w http.ResponseWriter, r *http.Request) {
 	var previous_sound = &sound{}
 	previous_sound, ok = val.(*sound)
 
-	log.Println(previous_sound)
-
 	message := "Welcome to Chinese Tones"
 	if ok {
 		if previous_sound.CorrectTones == enteredAnswer {
@@ -153,7 +152,6 @@ func home(w http.ResponseWriter, r *http.Request) {
 	session.Values["num_questions"] = num_questions + 1
 	session.Save(r, w)
 
-	log.Println(enteredAnswer)
 	err := tpl.ExecuteTemplate(w, "main.html", m)
 	if err != nil {
 		log.Println("Can’t load template", err)
