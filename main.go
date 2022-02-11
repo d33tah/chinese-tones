@@ -1,11 +1,11 @@
 package main
 
 import (
+	"github.com/gorilla/sessions"
 	"html/template"
 	"log"
 	"net/http"
 	"strconv"
-    "github.com/gorilla/sessions"
 )
 
 type response struct {
@@ -20,10 +20,9 @@ type response struct {
 	Tones                       map[string]string
 }
 
-
 var (
-    key = []byte("super-secret-key")
-    store = sessions.NewCookieStore(key)
+	key   = []byte("super-secret-key")
+	store = sessions.NewCookieStore(key)
 )
 
 func extractAnswer(r *http.Request) string {
@@ -50,13 +49,12 @@ func extractAnswer(r *http.Request) string {
 
 func home(w http.ResponseWriter, r *http.Request) {
 	tpl := template.Must(template.New("main").ParseGlob(`templates/*.html`))
-    session, _ := store.Get(r, "cookie-name")
+	session, _ := store.Get(r, "cookie-name")
 
-    num_questions, ok := session.Values["num_questions"].(int)
-    if !ok {
-        num_questions = 0
-    }
-
+	num_questions, ok := session.Values["num_questions"].(int)
+	if !ok {
+		num_questions = 0
+	}
 
 	m := response{
 		Path:                        "/sounds/jie2.ogg",
@@ -76,15 +74,15 @@ func home(w http.ResponseWriter, r *http.Request) {
 		},
 	}
 
-    session.Values["num_questions"] = num_questions + 1
-    session.Save(r, w)
+	session.Values["num_questions"] = num_questions + 1
+	session.Save(r, w)
 
-    enteredAnswer := extractAnswer(r)
-    log.Println(enteredAnswer)
-    err := tpl.ExecuteTemplate(w, "main.html", m)
-    if err != nil {
-        log.Println("Can’t load template", err)
-    }
+	enteredAnswer := extractAnswer(r)
+	log.Println(enteredAnswer)
+	err := tpl.ExecuteTemplate(w, "main.html", m)
+	if err != nil {
+		log.Println("Can’t load template", err)
+	}
 }
 
 func main() {
