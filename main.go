@@ -3,8 +3,10 @@ package main
 import (
 	"github.com/gorilla/sessions"
 	"html/template"
+	"io/ioutil"
 	"log"
 	"net/http"
+	"regexp"
 	"strconv"
 )
 
@@ -21,9 +23,24 @@ type response struct {
 }
 
 var (
-	key   = []byte("super-secret-key")
-	store = sessions.NewCookieStore(key)
+	key    = []byte("super-secret-key")
+	store  = sessions.NewCookieStore(key)
+	sounds = readSounds()
 )
+
+func readSounds() map[string]string {
+	ret := make(map[string]string)
+	files, err := ioutil.ReadDir("sounds")
+	if err != nil {
+		log.Fatal(err)
+	}
+	re := regexp.MustCompile("[^0-9]")
+	for _, f := range files {
+		ret[f.Name()] = re.ReplaceAllString(f.Name(), "")
+	}
+	log.Println(ret)
+	return ret
+}
 
 func extractAnswer(r *http.Request) string {
 	r.ParseForm()
