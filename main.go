@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+    "github.com/gorilla/sessions"
 )
 
 type response struct {
@@ -18,6 +19,12 @@ type response struct {
 	Perc                        string
 	Tones                       map[string]string
 }
+
+
+var (
+    key = []byte("super-secret-key")
+    store = sessions.NewCookieStore(key)
+)
 
 func extractAnswer(r *http.Request) string {
 	r.ParseForm()
@@ -41,8 +48,15 @@ func extractAnswer(r *http.Request) string {
 	return enteredAnswer
 }
 
-func home() http.HandlerFunc {
+func home(w http.ResponseWriter, r *http.Request) {
 	tpl := template.Must(template.New("main").ParseGlob(`templates/*.html`))
+    session, _ := store.Get(r, "cookie-name")
+
+    num_questions, ok := session.Values["num_questions"].(int)
+    if !ok {
+        num_questions = 0
+    }
+
 
 	m := response{
 		Path:                        "/sounds/jie2.ogg",
@@ -51,7 +65,7 @@ func home() http.HandlerFunc {
 		Pinyin_without_tones:        []string{"jie"},
 		Pinyin_without_tones_length: 1,
 		Score:                       0,
-		Num_questions:               0,
+		Num_questions:               num_questions,
 		Perc:                        "0%",
 		Tones: map[string]string{
 			"1": "flat",
@@ -61,20 +75,22 @@ func home() http.HandlerFunc {
 			"5": "neutral",
 		},
 	}
-	return func(w http.ResponseWriter, r *http.Request) {
-		enteredAnswer := extractAnswer(r)
-        log.Println(enteredAnswer)
-        err := tpl.ExecuteTemplate(w, "main.html", m)
-		if err != nil {
-			log.Println("Can’t load template", err)
-		}
-	}
+
+    session.Values["num_questions"] = num_questions + 1
+    session.Save(r, w)
+
+    enteredAnswer := extractAnswer(r)
+    log.Println(enteredAnswer)
+    err := tpl.ExecuteTemplate(w, "main.html", m)
+    if err != nil {
+        log.Println("Can’t load template", err)
+    }
 }
 
 func main() {
 	fs := http.FileServer(http.Dir("./sounds"))
 	http.Handle("/sounds/", http.StripPrefix("/sounds/", fs))
-	http.HandleFunc("/", home())
+	http.HandleFunc("/", home)
 
 	log.Println("Starting")
 	log.Fatal(http.ListenAndServe(":2137", nil))
